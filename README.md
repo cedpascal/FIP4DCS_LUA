@@ -21,7 +21,4 @@ Start the Software, select the profile you want to use, then you can ether start
 As soon as DCS is started and you're running a module (not in pause) then you should be able to read the data in the preview and FIP.
 the preview window works even if no FIP is installed.
 
-ToDO: Insert manual to prepare graphics, cshtml and json files
-
-The graphics work by ordering the files from the "background" up. _still_ in the name implies a static background (it can be omited) _rot_ on the other hand means that the image can be rotated by the corresponding DCS BIOS data in the fip.json.
-The pointer image should be roughly half the backgrounds size, quadratic (meaning the height is the same as the width) and point to the 0 or idle position of the gauge. The _x_ and _y_ coordinates, which you can include in the image file name, are the top left corner of that image, in relation to the background images top left corner. The parameter _g_ in a filename with an index number to it, relates to the fip.json gauge-array-position. The picture associated with a missing array entry in the gauges section will not be displayed at all.
+ToDO: Insert manual to prepare graphics, cshtml and json files + explain LUA itf
