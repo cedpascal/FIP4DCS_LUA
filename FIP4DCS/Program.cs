@@ -10,8 +10,7 @@ namespace FIP4DCS
 {
     internal static class Program
     {
-        public static readonly ILog Log =
-            LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        public static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         /// <summary>
         /// Der Haupteinstiegspunkt für die Anwendung.

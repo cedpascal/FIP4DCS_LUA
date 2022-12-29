@@ -1,4 +1,6 @@
-﻿using System;
+﻿using FIP4DCS;
+using log4net;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -134,20 +136,19 @@ namespace DCSBios
         {
             try
             {
-                UdpClient client = new UdpClient();
+                Socket mcastSocket = new Socket(AddressFamily.InterNetwork,
+                                                 SocketType.Dgram,
+                                                 ProtocolType.Udp);
 
-                client.ExclusiveAddressUse = false;
-                IPEndPoint localEp = new IPEndPoint(IPAddress.Any, listenPort);
+                IPAddress localIPAddr = IPAddress.Any;
+                IPEndPoint groupEP = new IPEndPoint(IPAddress.Parse(this.listenIP), this.listenPort);
+                EndPoint remoteEP = (EndPoint)new IPEndPoint(IPAddress.Any, 0);
+                EndPoint localEP = (EndPoint)new IPEndPoint(localIPAddr, this.listenPort);
 
-                client.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-                client.ExclusiveAddressUse = false;
-
-                client.Client.Bind(localEp);
-
-                IPAddress multicastaddress = IPAddress.Parse(listenIP);
-                client.JoinMulticastGroup(multicastaddress);
-
-                //Console.WriteLine("Listening this will never quit so you will need to ctrl-c it");
+                mcastSocket.Bind(localEP);
+                mcastSocket.SetSocketOption(SocketOptionLevel.IP,
+                                            SocketOptionName.AddMembership,
+                                            new MulticastOption(IPAddress.Parse(this.listenIP), localIPAddr));
 
                 Byte[] buffer = new Byte[1];
                 bool added = false;
@@ -155,7 +156,9 @@ namespace DCSBios
 
                 while (startUdP)
                 {
-                    Byte[] data = client.Receive(ref localEp);
+                    Byte[] data = new Byte[4096];
+                    int len = mcastSocket.ReceiveFrom(data, ref remoteEP);
+
                     if (data[0] == 0x55 && data[1] == 0x55 && data[2] == 0x55 && data[3] == 0x55)
                     {
                         if (added) ParseDcsBios(buffer);
@@ -168,11 +171,11 @@ namespace DCSBios
                         buffer.Concat(data);
                         added = true;
                     }
-                    //Console.Write(".");// Encoding.ASCII.GetString(data, 0, data.Length));
                 }
             }
-            catch (SocketException e)
+            catch (Exception e)
             {
+                Program.Log.Error("DCSBios failed to open socket : " + e.Message);
             }
             finally
             {
